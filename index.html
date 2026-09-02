@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر القفطان | Store caftan</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f8f9fa; color: #333; overflow-x: hidden; }
+
+        /* الهيدر المتجوب */
+        header { 
+            background-color: #1a252f; 
+            color: #fff; 
+            padding: 1rem 5%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .logo { font-size: 1.6rem; font-weight: bold; color: #2ec4b6; }
+        
+        .search-bar { flex-grow: 1; max-width: 400px; margin: 0 1rem; }
+        .search-bar input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .cart-icon { 
+            background-color: #2ec4b6; 
+            padding: 0.5rem 1rem; 
+            border-radius: 5px; 
+            color: #fff; 
+            text-decoration: none; 
+            font-weight: bold; 
+            cursor: pointer; 
+            white-space: nowrap;
+        }
+
+        /* Banner */
+        .hero-banner { 
+            background: linear-gradient(rgba(26,37,47,0.7), rgba(26,37,47,0.7)), url('https://via.placeholder.com/1200x400') center/cover; 
+            color: white; 
+            text-align: center; 
+            padding: 3rem 1rem; 
+            margin-bottom: 2rem; 
+        }
+        .hero-banner h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .hero-banner p { font-size: 1.1rem; color: #ddd; }
+
+        /* Container & Products Grid */
+        .container { width: 90%; max-width: 1200px; margin: 0 auto 3rem auto; }
+        .section-title { text-align: center; margin-bottom: 2rem; font-size: 1.8rem; color: #1a252f; }
+        
+        /* Grid متفاعل حسب شاشة الجهاز */
+        .products-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+            gap: 1.5rem; 
+        }
+
+        .product-card { 
+            background: #fff; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+        }
+        
+        .product-image { 
+            width: 100%; 
+            height: 280px; 
+            object-fit: cover; 
+            background: #eee; 
+            cursor: pointer; 
+            transition: transform 0.3s ease; 
+        }
+        .product-image:hover { transform: scale(1.02); }
+
+        .product-info { padding: 1.2rem; text-align: center; }
+        .product-title { font-size: 1.1rem; margin-bottom: 0.5rem; color: #2c3e50; }
+        .product-price { font-size: 1.2rem; color: #2ec4b6; font-weight: bold; margin-bottom: 0.5rem; }
+        .product-code { color: #666; font-size: 0.9rem; font-weight: bold; margin-bottom: 1rem; }
+        
+        .btn-add-cart { 
+            width: 100%; 
+            padding: 0.8rem; 
+            background-color: #1a252f; 
+            color: #fff; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: background 0.3s; 
+        }
+        .btn-add-cart:hover { background-color: #2ec4b6; }
+
+        /* النافذة الجانبية للسلة */
+        .cart-overlay { position: fixed; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; }
+        .cart-sidebar { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 380px; 
+            max-width: 85%; 
+            height: 100%; 
+            background: #fff; 
+            z-index: 201; 
+            transform: translateX(-100%); 
+            transition: transform 0.3s ease-in-out; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .cart-sidebar.open { transform: translateX(0); }
+        .cart-header { background: #1a252f; color: #fff; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .close-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        .cart-body { padding: 1rem; flex-grow: 1; overflow-y: auto; }
+        
+        /* عناصر التحكم بالسلة */
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid #eee; }
+        .qty-controls { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .btn-qty { width: 30px; height: 30px; background: #1a252f; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+
+        /* نموذج إدخال البيانات */
+        .checkout-form { display: none; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.3rem; font-size: 0.9rem; font-weight: bold; }
+        .form-group input { width: 100%; padding: 0.7rem; border: 1px solid #ccc; border-radius: 5px; outline: none; font-size: 0.95rem; }
+
+        .cart-footer { padding: 1rem; background: #f9f9f9; border-top: 1px solid #eee; }
+        .btn-main-action { width: 100%; padding: 0.8rem; background-color: #2ec4b6; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .btn-main-action:hover { background-color: #20968b; }
+        .btn-back { background: none; border: none; color: #777; cursor: pointer; text-decoration: underline; margin-top: 0.5rem; width: 100%; text-align: center; display: none; }
+
+        /* نافذة تكبير الصورة (Lightbox) */
+        .image-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 300; display: none; justify-content: center; align-items: center; flex-direction: column; padding: 10px; }
+        .image-modal img { max-width: 95%; max-height: 80vh; border-radius: 8px; }
+        .image-modal-close { position: absolute; top: 15px; right: 25px; color: white; font-size: 2.5rem; cursor: pointer; }
+        .image-modal-caption { color: white; margin-top: 15px; font-size: 1.1rem; text-align: center; }
+
+        /* إعدادات التجاوب المخصصة للهواتف (Responsive Media Queries) */
+        @media (max-width: 600px) {
+            header { padding: 0.8rem 4%; }
+            .search-bar { order: 3; width: 100%; max-width: 100%; margin: 0.5rem 0 0 0; }
+            .hero-banner { padding: 2rem 1rem; }
+            .hero-banner h1 { font-size: 1.5rem; }
+            .hero-banner p { font-size: 0.95rem; }
+            .products-grid { grid-template-columns: 1fr; }
+            .cart-sidebar { width: 100%; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">متجر القفطان</div>
+        <div class="search-bar">
+            <input type="text" placeholder="ابحث عن منتج...">
+        </div>
+        <div class="cart-icon" id="cart-btn">السلة 🛒 (<span id="cart-count">0</span>)</div>
+    </header>
+
+    <section class="hero-banner">
+        <h1>أحدث تشكيلة لعام 2026</h1>
+        <p>اكتشف أفضل المنتجات بأعلى جودة وأفضل الأسعار</p>
+    </section>
+
+    <div class="container">
+        <h2 class="section-title">المنتجات الأكثر مبيعاً</h2>
+        <div class="products-grid">
+            
+            <!-- المنتج الأول -->
+            <div class="product-card">
+                <img src="caftan A.jpg" alt="قفطان مغربية أنيقة" class="product-image" onclick="zoomImage(this.src, 'قفطان مغربية أنيقة')">
+                <div class="product-info">
+                    <h3 class="product-title">قفطان مغربية أنيقة</h3>
+                    <div class="product-price">850 د.م.</div>
+                    <button class="btn-add-cart" onclick="addToCart('قفطان مغربية أنيقة', 850, 'caftan A')">إضافة إلى السلة</button>
+                    <div class="product-code">caftan A</div>
+                </div>
+            </div>
+
+            <!-- المنتج الثاني -->
+            <div class="product-card">
+                <img src="caftan B.jpg" alt="caftan B" class="product-image" onclick="zoomImage(this.src, 'قفطان عصري فاخر')">
+                <div class="product-info">
+                    <h3 class="product-title">قفطان عصري فاخر</h3>
+                    <div class="product-price">600 د.م.</div>
+                    <button class="btn-add-cart" onclick="addToCart('قفطان عصري فاخر', 600, 'caftan B')">إضافة إلى السلة</button>
+                    <div class="product-code">caftan B</div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="caftan C.jpg" alt="قفطان مغربية أنيقة" class="product-image" onclick="zoomImage(this.src, 'قفطان مغربية أنيقة')">
+                <div class="product-info">
+                    <h3 class="product-title">قفطان مغربية أنيقة</h3>
+                    <div class="product-price">850 د.م.</div>
+                    <button class="btn-add-cart" onclick="addToCart('قفطان مغربية أنيقة', 850, 'caftan C')">إضافة إلى السلة</button>
+                    <div class="product-code">caftan C</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- نافذة تكبير الصورة -->
+    <div class="image-modal" id="image-modal" onclick="closeImageZoom()">
+        <span class="image-modal-close">&times;</span>
+        <img id="zoomed-img" src="" alt="صورة مكبرة">
+        <div class="image-modal-caption" id="zoomed-caption"></div>
+    </div>
+
+    <!-- النافذة الجانبية للسلة -->
+    <div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3 id="sidebar-title">سلة المشتريات</h3>
+            <button class="close-btn" onclick="closeCart()">&times;</button>
+        </div>
+        
+        <div class="cart-body">
+            <!-- المرحلة 1: عرض المنتجات والأعداد -->
+            <div id="step-cart">
+                <div id="cart-items"><p style="text-align:center; color:#777;">السلة فارغة حالياً</p></div>
+            </div>
+
+            <!-- المرحلة 2: نموذج إدخال البيانات -->
+            <div id="step-form" class="checkout-form">
+                <h4 style="margin-bottom:1rem; color:#1a252f;">معلومات التوصيل</h4>
+                <div class="form-group">
+                    <label>الاسم الكامل:</label>
+                    <input type="text" id="cust-name" placeholder="أدخل اسمك الكامل">
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف:</label>
+                    <input type="tel" id="cust-phone" placeholder="06XXXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label>المدينة والعنوان:</label>
+                    <input type="text" id="cust-city" placeholder="المدينة والعنوان بالتفصيل">
+                </div>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-weight:bold;">
+                <span>المجموع الإجمالي:</span>
+                <span id="total-amount">0 د.م.</span>
+            </div>
+            
+            <button class="btn-main-action" id="action-btn" onclick="handleMainAction()">تأكيد الطلب</button>
+            <button class="btn-back" id="back-btn" onclick="showCartStep()">الرجوع للسلة</button>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+        let currentStep = 1;
+        const myPhoneNumber = "212713594743";
+
+        function zoomImage(src, title) {
+            document.getElementById('zoomed-img').src = src;
+            document.getElementById('zoomed-caption').textContent = title;
+            document.getElementById('image-modal').style.display = 'flex';
+        }
+
+        function closeImageZoom() {
+            document.getElementById('image-modal').style.display = 'none';
+        }
+
+        // تم تعديل الدالة لتقبل المرجع code
+        function addToCart(title, price, code) {
+            const item = cart.find(i => i.code === code);
+            if (item) {
+                item.qty++;
+            } else {
+                cart.push({ title, price, code, qty: 1 });
+            }
+            updateUI();
+            showCartStep();
+            openCart();
+        }
+
+        function changeQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            const container = document.getElementById('cart-items');
+            const countEl = document.getElementById('cart-count');
+            const totalEl = document.getElementById('total-amount');
+            let total = 0, count = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#777;">السلة فارغة حالياً</p>';
+                showCartStep();
+            } else {
+                container.innerHTML = '';
+                cart.forEach((item, idx) => {
+                    count += item.qty;
+                    total += item.price * item.qty;
+                    container.innerHTML += `
+                        <div class="cart-item">
+                            <div>
+                                <strong>${item.title}</strong>
+                                <div style="font-size: 0.85rem; color: #666; font-weight: bold;">(${item.code})</div>
+                                <div style="color:#2ec4b6; font-weight:bold;">${item.price} د.م.</div>
+                            </div>
+                            <div class="qty-controls">
+                                <button class="btn-qty" onclick="changeQty(${idx}, -1)">-</button>
+                                <span>${item.qty}</span>
+                                <button class="btn-qty" onclick="changeQty(${idx}, 1)">+</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            countEl.textContent = count;
+            totalEl.textContent = total + ' د.م.';
+        }
+
+        function handleMainAction() {
+            if (cart.length === 0) {
+                alert('السلة فارغة!');
+                return;
+            }
+
+            if (currentStep === 1) {
+                showFormStep();
+            } else {
+                submitOrder();
+            }
+        }
+
+        function showCartStep() {
+            currentStep = 1;
+            document.getElementById('step-cart').style.display = 'block';
+            document.getElementById('step-form').style.display = 'none';
+            document.getElementById('sidebar-title').textContent = 'سلة المشتريات';
+            document.getElementById('action-btn').textContent = 'تأكيد الطلب';
+            document.getElementById('back-btn').style.display = 'none';
+        }
+
+        function showFormStep() {
+            currentStep = 2;
+            document.getElementById('step-cart').style.display = 'none';
+            document.getElementById('step-form').style.display = 'block';
+            document.getElementById('sidebar-title').textContent = 'معلومات الزبون';
+            document.getElementById('action-btn').textContent = 'إرسال الطلب عبر واتساب 📲';
+            document.getElementById('back-btn').style.display = 'block';
+        }
+
+        function openCart() {
+            document.getElementById('cart-overlay').style.display = 'block';
+            document.getElementById('cart-sidebar').classList.add('open');
+        }
+
+        function closeCart() {
+            document.getElementById('cart-overlay').style.display = 'none';
+            document.getElementById('cart-sidebar').classList.remove('open');
+        }
+
+        document.getElementById('cart-btn').addEventListener('click', openCart);
+
+        // تعديل نص الرسالة الموجهة للواتساب لتظهر المراجع بوضوح
+        function submitOrder() {
+            const name = document.getElementById('cust-name').value.trim();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const city = document.getElementById('cust-city').value.trim();
+
+            if (!name || !phone || !city) {
+                alert('يرجى كتابة الاسم، الهاتف، والعنوان أولاً.');
+                return;
+            }
+
+            let message = `مرحباً، أود تأكيد الطلب التالي من متجر القفطان*:%0A%0A`;
+            message += `🔹 *بيانات الزبون:*%0A`;
+            message += `• الاسم: ${name}%0A`;
+            message += `• الهاتف: ${phone}%0A`;
+            message += `• العنوان: ${city}%0A%0A`;
+            
+            message += `🔹 *المنتجات:*%0A`;
+            let total = 0;
+            cart.forEach(item => {
+                message += `• ${item.title} (${item.code}) (الكمية: ${item.qty}) -> ${item.price * item.qty} د.م.%0A`;
+                total += item.price * item.qty;
+            });
+
+            message += `%0A🔹 *الإجمالي:* ${total} د.م.`;
+
+            const whatsappUrl = `https://wa.me/${myPhoneNumber}?text=${message}`;
+            window.open(whatsappUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
